@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional: Custom scrollbar for chat box */
+.chat-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d1d5db; /* gray-300 */
+  border-radius: 3px;
+}
+.chat-scrollbar {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #d1d5db transparent;
+}
+
+
