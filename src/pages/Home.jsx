@@ -6,10 +6,16 @@ import { useChat } from '../context/ChatContext';
 const Home = () => {
   const { data } = useChat();
 
+  // Mobile view: 'sidebar' or 'chatbox'
   const [mobileView, setMobileView] = useState('sidebar');
   const isChatSelected = data.chatId && data.chatId !== 'null';
 
-  const handleOpenChat = () => setMobileView('chatbox');
+  // Open chat in mobile
+  const handleOpenChat = () => {
+    if (isChatSelected) setMobileView('chatbox');
+  };
+
+  // Go back to sidebar in mobile
   const handleCloseChat = () => setMobileView('sidebar');
 
   // ✅ Fix viewport height for real mobile devices
@@ -35,7 +41,7 @@ const Home = () => {
           className={`
             flex flex-col overflow-y-auto border-r bg-gray-50
             transition-all duration-300 ease-in-out
-            md:w-1/3 md:flex 
+            md:w-1/3 md:flex
             ${showSidebarMobile ? 'w-full flex' : 'hidden'}
           `}
         >
