@@ -26,10 +26,12 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
   const [replyMessage, setReplyMessage] = useState(null);
   const messagesEndRef = useRef(null);
 
+  // Scroll to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Mark messages as read
   const handleMarkAsRead = async (messageId) => {
     if (!data.chatId || !currentUser.uid) return;
     try {
@@ -37,12 +39,11 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
       const chatDoc = await getDoc(chatDocRef);
       if (chatDoc.exists()) {
         const currentMessages = chatDoc.data().messages || [];
-        const updatedMessages = currentMessages.map((msg) => {
-          if (msg.id === messageId && msg.senderId === data.user.uid && !msg.isRead) {
-            return { ...msg, isRead: true };
-          }
-          return msg;
-        });
+        const updatedMessages = currentMessages.map((msg) =>
+          msg.id === messageId && msg.senderId === data.user.uid && !msg.isRead
+            ? { ...msg, isRead: true }
+            : msg
+        );
         await setDoc(chatDocRef, { messages: updatedMessages }, { merge: true });
       }
     } catch (err) {
@@ -50,6 +51,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
     }
   };
 
+  // Load messages
   useEffect(() => {
     if (data.chatId === 'null') {
       setMessages([]);
@@ -77,12 +79,14 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
     scrollToBottom();
   }, [messages]);
 
+  // Emoji click
   const onEmojiClick = (emojiData) => {
     const emoji = emojiData?.emoji || emojiData?.native;
     if (emoji) setText((prevText) => prevText + emoji);
     setShowPicker(false);
   };
 
+  // Edit message
   const handleEditMessage = (messageId, currentText) => {
     setReplyMessage(null);
     setEditMessageId(messageId);
@@ -103,12 +107,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
         const currentMessages = chatDoc.data().messages || [];
         const updatedMessages = currentMessages.map((msg) =>
           msg.id === editMessageId
-            ? {
-                ...msg,
-                text: text.trim(),
-                timestamp: Timestamp.now(),
-                edited: true,
-              }
+            ? { ...msg, text: text.trim(), timestamp: Timestamp.now(), edited: true }
             : msg
         );
         await setDoc(chatDocRef, { messages: updatedMessages }, { merge: true });
@@ -128,27 +127,26 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
     toast.info('Editing cancelled.');
   };
 
+  // Reply
   const handleReplyMessage = (message) => {
     setEditMessageId(null);
     setReplyMessage(message);
     setText('');
     setShowPicker(false);
   };
-
   const handleCancelReply = () => {
     setReplyMessage(null);
     setText('');
   };
 
+  // Delete
   const handleDeleteMessage = async (messageId) => {
     if (!data.chatId) return;
     try {
       const chatDocRef = doc(db, 'chats', data.chatId);
       const chatDoc = await getDoc(chatDocRef);
       if (chatDoc.exists()) {
-        const updatedMessages = (chatDoc.data().messages || []).filter(
-          (msg) => msg.id !== messageId
-        );
+        const updatedMessages = (chatDoc.data().messages || []).filter((msg) => msg.id !== messageId);
         await setDoc(chatDocRef, { messages: updatedMessages }, { merge: true });
         toast.success('Message deleted!');
       }
@@ -158,6 +156,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
     }
   };
 
+  // React
   const handleReactMessage = async (messageId, emoji) => {
     if (!data.chatId || !currentUser.uid) return;
     try {
@@ -172,11 +171,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
             if (userReaction && userReaction.emoji === emoji) {
               return { ...msg, reactions: reactions.filter((r) => r.userId !== currentUser.uid) };
             }
-            const updatedReactions = [
-              ...reactions.filter((r) => r.userId !== currentUser.uid),
-              { userId: currentUser.uid, emoji },
-            ];
-            return { ...msg, reactions: updatedReactions };
+            return { ...msg, reactions: [...reactions.filter((r) => r.userId !== currentUser.uid), { userId: currentUser.uid, emoji }] };
           }
           return msg;
         });
@@ -187,6 +182,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
     }
   };
 
+  // Send
   const handleSend = async (e) => {
     e.preventDefault();
     if (!data.chatId || !text.trim()) return;
@@ -200,10 +196,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
       const replyInfo = replyMessage
         ? {
             id: replyMessage.id,
-            sender:
-              replyMessage.senderId === currentUser.uid
-                ? currentUser.displayName
-                : data.user.displayName,
+            sender: replyMessage.senderId === currentUser.uid ? currentUser.displayName : data.user.displayName,
             text: replyMessage.text,
             senderId: replyMessage.senderId,
           }
@@ -232,7 +225,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
     }
   };
 
-  // ✅ No user selected view
+  // No user selected
   if (data.chatId === 'null') {
     return (
       <div
@@ -280,7 +273,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 w-full p-4 overflow-y-auto chat-scrollbar bg-white/5 backdrop-blur-lg">
+      <div className="flex-1 w-full p-4 pb-24 overflow-y-auto chat-scrollbar bg-white/5 backdrop-blur-lg">
         {messages.map((m) => (
           <Message
             key={m.id}
@@ -310,8 +303,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
               {replyMessage ? (
                 <div className="truncate">
                   <p className="font-semibold text-blue-400">
-                    Replying to{' '}
-                    {replyMessage.senderId === currentUser.uid ? 'You' : data.user.displayName}
+                    Replying to {replyMessage.senderId === currentUser.uid ? 'You' : data.user.displayName}
                   </p>
                   <p className="text-xs italic text-gray-300 truncate">{replyMessage.text}</p>
                 </div>
@@ -341,11 +333,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
           <input
             type="text"
             placeholder={
-              editMessageId
-                ? 'Edit message...'
-                : replyMessage
-                ? 'Reply to message...'
-                : 'Type a message...'
+              editMessageId ? 'Edit message...' : replyMessage ? 'Reply to message...' : 'Type a message...'
             }
             value={text}
             onChange={(e) => setText(e.target.value)}
