@@ -5,9 +5,24 @@
   box-sizing: border-box;
 }
 
+/* ✅ Fix for mobile viewport height issues */
+.full-height {
+  height: calc(var(--vh, 1vh) * 100);
+}
+
+/* Optional (if scroll causes layout shift on mobile) */
+/* html, body, #root {
+  width: 100%;
+  
+  padding: 0;
+  overflow: hidden;
+} */
+
+
 html, body, #root { 
   height: 100%;
   width: 100%;
+  margin: 0;
   padding:0;
   box-sizing: border-box;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
