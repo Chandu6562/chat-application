@@ -235,7 +235,10 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
   // ✅ No user selected view
   if (data.chatId === 'null') {
     return (
-      <div className="flex items-center justify-center flex-1 w-full full-height bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+      <div
+        className="flex items-center justify-center flex-1 w-full bg-gradient-to-br from-gray-900 via-gray-800 to-black"
+        style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
+      >
         {isMobileView && (
           <div className="absolute top-4 left-4 md:hidden">
             <button
@@ -253,7 +256,10 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
   }
 
   return (
-    <div className="relative flex flex-col flex-1 w-full full-height bg-gradient-to-br from-[#0f0f0f] via-[#121212] to-[#1a1a1a] text-gray-200 overflow-hidden rounded-1xl border border-gray-800/50">
+    <div
+      className="relative flex flex-col flex-1 w-full bg-gradient-to-br from-[#0f0f0f] via-[#121212] to-[#1a1a1a] text-gray-200 overflow-hidden rounded-1xl border border-gray-800/50"
+      style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
+    >
       {/* Header */}
       <div className="z-10 flex items-center p-4 border-b border-gray-700 bg-white/10 backdrop-blur-xl">
         {isMobileView && (

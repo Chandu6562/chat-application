@@ -36,8 +36,11 @@ const Home = () => {
   const showChatBoxMobile = mobileView === 'chatbox';
 
   return (
-    // ✅ Replace h-screen with custom CSS variable height to fix real mobile issue
-    <div className="flex w-screen overflow-hidden bg-white full-height">
+    // ✅ Use CSS variable --vh for full viewport height on real mobile devices
+    <div
+      className="flex w-screen overflow-hidden bg-white"
+      style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
+    >
       <div className="flex w-full h-full overflow-hidden bg-white">
         
         {/* ------------------------------------------- */}

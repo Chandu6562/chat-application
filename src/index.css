@@ -15,7 +15,20 @@
     scrollbar-color: #d1d5db transparent;
 }
 
+
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #f9fafb; /* optional: match your app background */
+}
+
 .main-content {
-  padding-top: 64px; /* Adjust based on navbar height */
+  padding-top: 64px; /* Adjust to your Navbar height */
+  padding-bottom: env(safe-area-inset-bottom); /* Safe area fix for mobile bottom */
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
