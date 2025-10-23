@@ -15,4 +15,7 @@
     scrollbar-color: #d1d5db transparent;
 }
 
+.main-content {
+  padding-top: 64px; /* Adjust based on navbar height */
+}
 

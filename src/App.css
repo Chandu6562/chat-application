@@ -5,10 +5,7 @@
   box-sizing: border-box;
 }
 
-/* ✅ Fix for mobile viewport height issues */
-.full-height {
-  height: calc(var(--vh, 1vh) * 100);
-}
+
 
 /* Optional (if scroll causes layout shift on mobile) */
 /* html, body, #root {
@@ -17,6 +14,7 @@
   padding: 0;
   overflow: hidden;
 } */
+
 
 
 html, body, #root { 
@@ -104,4 +102,31 @@ html, body, #root {
   .card {
     padding: 1em;
   }
+}
+
+/* ✅ Fix for mobile viewport height issues */
+.full-height {
+  height: calc(var(--vh, 1vh) * 100);
+}
+
+/* .full-height {
+  height: calc(var(--vh, 1vh) * 100);
+} */
+
+.chat-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #555 #222;
+}
+
+.chat-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 8px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+  background-color: #222;
 }

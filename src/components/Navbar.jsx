@@ -27,8 +27,8 @@ const Navbar = () => {
   };
 
   return (
-    <div className="flex items-center justify-between p-4 text-white bg-blue-600 shadow-md">
-      
+    <div className="fixed top-0 left-0 z-50 flex items-center justify-between w-full p-4 text-white bg-blue-600 shadow-md">
+
       {/* App Logo/Title */}
       <Link to="/" className="text-xl font-bold">
         Talk2Me
