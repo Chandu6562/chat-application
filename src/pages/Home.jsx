@@ -25,27 +25,8 @@ const Home = () => {
       document.documentElement.style.setProperty('--vh', `${vh}px`);
     };
     setViewportHeight();
-
-    // listen to visualViewport when available (handles mobile keyboard)
-    const onVVChange = () => {
-      // recalc --vh based on layout viewport
-      const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight) * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    };
-
     window.addEventListener('resize', setViewportHeight);
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', onVVChange);
-      window.visualViewport.addEventListener('scroll', onVVChange);
-    }
-
-    return () => {
-      window.removeEventListener('resize', setViewportHeight);
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', onVVChange);
-        window.visualViewport.removeEventListener('scroll', onVVChange);
-      }
-    };
+    return () => window.removeEventListener('resize', setViewportHeight);
   }, []);
 
   const showSidebarMobile = mobileView === 'sidebar';
