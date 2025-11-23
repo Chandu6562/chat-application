@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import Message from './Message';
 import { toast } from 'react-toastify';
 import { Send, Smile, X, ArrowLeft } from 'lucide-react';
-import EmojiPicker from 'emoji-picker-react';
+import EmojiPicker from 'emoji-picker-react'; 
 
 const ChatBox = ({ onBackToUsers, isMobileView }) => {
   const { data } = useChat();
@@ -18,7 +18,10 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
   const [replyMessage, setReplyMessage] = useState(null);
   const messagesEndRef = useRef(null);
 
-  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // Added: ref for the scrollable messages container
+  const messagesContainerRef = useRef(null);
+
+  const scrollToBottom = (behavior = 'smooth') => messagesEndRef.current?.scrollIntoView({ behavior });
 
   const handleMarkAsRead = async (messageId) => {
     if (!data.chatId || !currentUser.uid) return;
@@ -52,7 +55,57 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
     return () => unSub();
   }, [data.chatId, data.user.uid]);
 
-  useEffect(() => scrollToBottom(), [messages]);
+  // Keep simple scroll on messages change (fast path)
+  useEffect(() => {
+    // slight delay helps when mobile keyboard is animating viewport
+    const t = setTimeout(() => scrollToBottom('auto'), 100);
+    return () => clearTimeout(t);
+  }, [messages]);
+
+  // Robust observer + visualViewport + input-focus handling for mobile keyboards
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const doScroll = () => {
+      // use smooth if possible; small delay for viewport/keyboard animation
+      setTimeout(() => scrollToBottom('smooth'), 120);
+    };
+
+    // MutationObserver: scroll when new nodes are added (works regardless of state naming)
+    const observer = new MutationObserver(doScroll);
+    observer.observe(container, { childList: true, subtree: true });
+
+    // input focus within this component -> scroll after keyboard opens
+    const root = container.closest('.relative') || container.parentElement; // container's root wrapper
+    const inputEl = root?.querySelector('input[type="text"], textarea, [contenteditable="true"]');
+    const onFocus = () => setTimeout(() => scrollToBottom('smooth'), 160);
+    if (inputEl) inputEl.addEventListener('focus', onFocus);
+
+    // visualViewport handles many mobile keyboard cases (iOS/Android)
+    const onViewportChange = () => setTimeout(() => scrollToBottom('smooth'), 160);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', onViewportChange);
+      window.visualViewport.addEventListener('scroll', onViewportChange);
+    } else {
+      // fallback to window resize
+      window.addEventListener('resize', onViewportChange);
+    }
+
+    // initial ensure
+    doScroll();
+
+    return () => {
+      observer.disconnect();
+      if (inputEl) inputEl.removeEventListener('focus', onFocus);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', onViewportChange);
+        window.visualViewport.removeEventListener('scroll', onViewportChange);
+      } else {
+        window.removeEventListener('resize', onViewportChange);
+      }
+    };
+  }, []);
 
   const onEmojiClick = (emojiData) => {
     const emoji = emojiData?.emoji || emojiData?.native;
@@ -184,7 +237,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 w-full p-4 overflow-y-auto pb-28 chat-scrollbar bg-white/5 backdrop-blur-lg">
+      <div ref={messagesContainerRef} className="flex-1 w-full p-4 overflow-y-auto pb-28 chat-scrollbar bg-white/5 backdrop-blur-lg">
         {messages.map((m) => (
           <Message key={m.id} message={m} onEdit={handleEditMessage} onReply={handleReplyMessage} onDelete={handleDeleteMessage} onReact={handleReactMessage} currentUserId={currentUser.uid} />
         ))}
@@ -227,6 +280,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
             placeholder={editMessageId ? 'Edit message...' : replyMessage ? 'Reply to message...' : 'Type a message...'}
             value={text}
             onChange={(e) => setText(e.target.value)}
+            onFocus={() => setTimeout(() => scrollToBottom('smooth'), 160)} // ensure scroll when keyboard opens
             className="flex-1 px-5 py-3 text-gray-100 placeholder-gray-400 border border-gray-700 rounded-full bg-black/10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             autoFocus={editMessageId || replyMessage}
           />
