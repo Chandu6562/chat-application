@@ -15,7 +15,17 @@
     scrollbar-color: #d1d5db transparent;
 }
 
+/* Added: real-viewport var + helper to fill mobile viewport */
+:root {
+  --vh: 1vh;
+}
 
+.full-height {
+  /* Uses the --vh value set in JS to account for mobile browser UI */
+  height: calc(var(--vh, 1vh) * 100);
+  min-height: 100%;
+  box-sizing: border-box;
+}
 
 html,
 body {

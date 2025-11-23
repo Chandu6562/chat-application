@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 
 const ChatContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useChat = () => useContext(ChatContext);
 
 // Initial state for the chat
@@ -15,7 +16,7 @@ const INITIAL_STATE = {
 const chatReducer = (state, action) => {
   switch (action.type) {
     case 'CHANGE_USER':
-      const { currentUser } = action.payload.auth;
+      { const { currentUser } = action.payload.auth;
       const selectedUser = action.payload.user;
 
       // Create a unique chat ID by sorting UIDs (ensures the ID is always the same)
@@ -27,7 +28,7 @@ const chatReducer = (state, action) => {
       return {
         user: selectedUser,
         chatId: combinedId,
-      };
+      }; }
     
     case 'RESET_CHAT':
         return INITIAL_STATE;
