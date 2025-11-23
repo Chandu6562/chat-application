@@ -21,7 +21,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
   // Added: ref for the scrollable messages container
   const messagesContainerRef = useRef(null);
 
-  const scrollToBottom = (behavior = 'smooth') => messagesEndRef.current?.scrollIntoView({ behavior });
+  const scrollToBottom = (behavior = 'auto') => messagesEndRef.current?.scrollIntoView({ behavior });
 
   const handleMarkAsRead = async (messageId) => {
     if (!data.chatId || !currentUser.uid) return;
@@ -58,7 +58,7 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
   // Keep simple scroll on messages change (fast path)
   useEffect(() => {
     // slight delay helps when mobile keyboard is animating viewport
-    const t = setTimeout(() => scrollToBottom('auto'), 100);
+    const t = setTimeout(() => scrollToBottom('auto'), 120);
     return () => clearTimeout(t);
   }, [messages]);
 
@@ -68,27 +68,26 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
     if (!container) return;
 
     const doScroll = () => {
-      // use smooth if possible; small delay for viewport/keyboard animation
-      setTimeout(() => scrollToBottom('smooth'), 120);
+      // small delay to allow viewport/keyboard animation to finish
+      setTimeout(() => scrollToBottom('auto'), 140);
     };
 
-    // MutationObserver: scroll when new nodes are added (works regardless of state naming)
+    // MutationObserver: scroll when new nodes are added
     const observer = new MutationObserver(doScroll);
     observer.observe(container, { childList: true, subtree: true });
 
     // input focus within this component -> scroll after keyboard opens
-    const root = container.closest('.relative') || container.parentElement; // container's root wrapper
+    const root = container.closest('.relative') || container.parentElement;
     const inputEl = root?.querySelector('input[type="text"], textarea, [contenteditable="true"]');
-    const onFocus = () => setTimeout(() => scrollToBottom('smooth'), 160);
+    const onFocus = () => setTimeout(() => scrollToBottom('auto'), 160);
     if (inputEl) inputEl.addEventListener('focus', onFocus);
 
-    // visualViewport handles many mobile keyboard cases (iOS/Android)
-    const onViewportChange = () => setTimeout(() => scrollToBottom('smooth'), 160);
+    // visualViewport handles many mobile keyboard cases
+    const onViewportChange = () => setTimeout(() => scrollToBottom('auto'), 160);
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', onViewportChange);
       window.visualViewport.addEventListener('scroll', onViewportChange);
     } else {
-      // fallback to window resize
       window.addEventListener('resize', onViewportChange);
     }
 
@@ -223,10 +222,11 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
   }
 
   return (
+    // make container relative so the effect can find inputs and use visualViewport reliably
     <div className="relative flex flex-col flex-1 w-full bg-gradient-to-br from-[#0f0f0f] via-[#121212] to-[#1a1a1a] text-gray-200 overflow-hidden rounded-1xl border border-gray-800/50" style={{ height: 'calc(var(--vh, 1vh) * 100)' }}>
       
-      {/* Header */}
-      <div className="z-20 flex items-center flex-shrink-0 p-4 border-b border-gray-700 bg-black/20 backdrop-blur-xl">
+      {/* Header: non-shrinking + above messages */}
+      <div className="z-30 flex items-center flex-shrink-0 p-4 border-b border-gray-700 bg-black/20 backdrop-blur-xl">
         {isMobileView && (
           <button onClick={onBackToUsers} className="p-1 mr-2 text-gray-300 transition rounded-full md:hidden hover:bg-white/10">
             <ArrowLeft size={24} />
@@ -236,23 +236,16 @@ const ChatBox = ({ onBackToUsers, isMobileView }) => {
         <h3 className="text-xl font-semibold text-white">{data.user.displayName}</h3>
       </div>
 
-      {/* Messages */}
-      <div ref={messagesContainerRef} className="flex-1 w-full p-4 overflow-y-auto pb-28 chat-scrollbar bg-white/5 backdrop-blur-lg">
+      {/* Messages: flexible, add extra bottom padding so input never overlaps */}
+      <div ref={messagesContainerRef} className="z-10 flex-1 w-full p-4 pb-32 overflow-y-auto chat-scrollbar bg-white/5 backdrop-blur-lg">
         {messages.map((m) => (
           <Message key={m.id} message={m} onEdit={handleEditMessage} onReply={handleReplyMessage} onDelete={handleDeleteMessage} onReact={handleReactMessage} currentUserId={currentUser.uid} />
         ))}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Emoji Picker */}
-      {showPicker && (
-        <div className="absolute z-20 overflow-hidden bottom-28 right-4 rounded-xl bg-[#1e1e1e]/70 backdrop-blur-2xl shadow-2xl border border-gray-700">
-          <EmojiPicker onEmojiClick={onEmojiClick} height={350} />
-        </div>
-      )}
-
-      {/* Input */}
-      <form onSubmit={handleSend} className="flex flex-col p-4 border-t border-gray-700 bg-black/20 backdrop-blur-xl">
+      {/* Input: non-shrinking + above messages */}
+      <form onSubmit={handleSend} className="z-30 flex flex-col flex-shrink-0 p-4 border-t border-gray-700 bg-black/20 backdrop-blur-xl">
         {(editMessageId || replyMessage) && (
           <div className="mb-2 transition-all duration-300 ease-in-out">
             <div className="flex items-center justify-between p-3 text-sm border-l-4 border-blue-500 rounded-lg shadow-md bg-blue-500/10 backdrop-blur-md">
