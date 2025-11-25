@@ -1,10 +1,8 @@
-// src/context/ChatContext.jsx
 import { createContext, useContext, useReducer } from 'react';
-import { useAuth } from './AuthContext';
+import { useAuth } from './AuthContext'; // Keeping the standard path, as it is structurally correct
 
 const ChatContext = createContext();
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useChat = () => useContext(ChatContext);
 
 // Initial state for the chat
@@ -16,22 +14,28 @@ const INITIAL_STATE = {
 const chatReducer = (state, action) => {
   switch (action.type) {
     case 'CHANGE_USER':
-      { const { currentUser } = action.payload.auth;
-      const selectedUser = action.payload.user;
+      // FIX: Access selected user from action.payload and current user UID from the injected action property
+      const selectedUser = action.payload;
+      const currentUserUid = action.currentUserUid; 
+
+      // Guard clause: ensure both UIDs exist before calculating ID
+      if (!currentUserUid || !selectedUser.uid) {
+        return state;
+      }
 
       // Create a unique chat ID by sorting UIDs (ensures the ID is always the same)
       const combinedId =
-        currentUser.uid > selectedUser.uid
-          ? currentUser.uid + selectedUser.uid
-          : selectedUser.uid + currentUser.uid;
+        currentUserUid > selectedUser.uid
+          ? currentUserUid + selectedUser.uid
+          : selectedUser.uid + currentUserUid;
 
       return {
         user: selectedUser,
         chatId: combinedId,
-      }; }
+      };
     
     case 'RESET_CHAT':
-        return INITIAL_STATE;
+      return INITIAL_STATE;
 
     default:
       return state;
@@ -42,8 +46,19 @@ export const ChatProvider = ({ children }) => {
   const { currentUser } = useAuth();
   const [state, dispatch] = useReducer(chatReducer, INITIAL_STATE);
 
+  // FIX: Wrap the dispatch function to inject currentUserUid into the action
+  const dispatchWithCurrentUser = (action) => {
+    if (action.type === 'CHANGE_USER' && currentUser) {
+      // Inject the current user's UID directly into the action for the reducer
+      dispatch({ ...action, currentUserUid: currentUser.uid });
+    } else {
+      dispatch(action);
+    }
+  };
+
   return (
-    <ChatContext.Provider value={{ data: state, dispatch }}>
+    // Provide the wrapped dispatch function
+    <ChatContext.Provider value={{ data: state, dispatch: dispatchWithCurrentUser }}>
       {children}
     </ChatContext.Provider>
   );

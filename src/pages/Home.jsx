@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../components/Sidebar';
 import ChatBox from '../components/ChatBox';
 import { useChat } from '../context/ChatContext';
@@ -9,16 +9,20 @@ const Home = () => {
   // Mobile view: 'sidebar' or 'chatbox'
   const [mobileView, setMobileView] = useState('sidebar');
   const isChatSelected = data.chatId && data.chatId !== 'null';
+  
+  // Responsive check for history management
+  const isMobileScreen = () => window.innerWidth < 768;
 
-  // Open chat in mobile
-  const handleOpenChat = () => {
-    if (isChatSelected) setMobileView('chatbox');
-  };
+  // Open chat in mobile: UNCONDITIONAL FIX for issue #1 (Chat not opening on first click)
+  // We switch the view immediately and rely on the ChatBox/context to render content correctly.
+  const handleOpenChat = useCallback(() => {
+    setMobileView('chatbox');
+  }, []);
 
   // Go back to sidebar in mobile
-  const handleCloseChat = () => setMobileView('sidebar');
+  const handleCloseChat = useCallback(() => setMobileView('sidebar'), []);
 
-  // ✅ Fix viewport height for real mobile devices (Landed here correctly)
+  // ✅ Fix viewport height for real mobile devices (Maintaining existing logic)
   useEffect(() => {
     const setViewportHeight = () => {
       const vh = window.innerHeight * 0.01;
@@ -30,9 +34,41 @@ const Home = () => {
   }, []);
 
   const showSidebarMobile = mobileView === 'sidebar';
-  // Use data.chatId as the definitive check for showing the chat on mobile, 
-  // as the `mobileView` state only controls the *visibility*
   const showChatBoxMobile = mobileView === 'chatbox'; 
+
+  // ✅ FIX for issue #2: Browser History Management (Preventing navigation to Login)
+  useEffect(() => {
+    // Only execute this logic on mobile screen sizes when the chat is open
+    if (showChatBoxMobile && isMobileScreen()) {
+      
+      // Push a state to history. This intercepts the device's back button.
+      window.history.pushState({ mobileView: 'chatbox' }, '', window.location.pathname);
+
+      const handlePopState = (event) => {
+        // If the back button is pressed, intercept the action
+        if (event.state && event.state.mobileView === 'chatbox') {
+          handleCloseChat();
+        } else {
+          // Fallback: If navigating past our pushed state, prevent leaving the app
+          window.history.pushState(null, '', window.location.pathname);
+          handleCloseChat();
+        }
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+        
+        // Clean up the history state when the component cleans up
+        if (window.history.state && window.history.state.mobileView === 'chatbox') {
+           // Use a timeout to ensure back button doesn't trigger another popstate event immediately
+           setTimeout(() => window.history.back(), 0); 
+        }
+      };
+    }
+  }, [showChatBoxMobile, handleCloseChat]);
+
 
   return (
     // Outer container: Must use 'full-height' to fix mobile viewport issues
@@ -51,7 +87,7 @@ const Home = () => {
           ${showSidebarMobile ? 'w-full flex' : 'hidden'}
         `}
       >
-        {/* Overflow-y-auto is best applied to the content inside the sidebar, not the container itself */}
+        {/* We pass handleOpenChat here, which now switches view unconditionally */}
         <Sidebar onUserSelect={handleOpenChat} />
       </div>
 
@@ -70,6 +106,7 @@ const Home = () => {
       >
         {isChatSelected ? (
           <ChatBox
+            // onBackToUsers triggers handleCloseChat, switching the view internally (The arrow button)
             onBackToUsers={handleCloseChat}
             isMobileView={showChatBoxMobile}
           />
