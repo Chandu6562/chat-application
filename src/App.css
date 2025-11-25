@@ -5,18 +5,9 @@
   box-sizing: border-box;
 }
 
-
-
-/* Optional (if scroll causes layout shift on mobile) */
-/* html, body, #root {
-  width: 100%;
-  
-  padding: 0;
-  overflow: hidden;
-} */
-
-
-
+/* Core Responsive Fix: Ensure HTML, Body, and the root React element (#root) 
+  always take up 100% of the screen and prevent outside scrolling.
+*/
 html, body, #root { 
   height: 100%;
   width: 100%;
@@ -25,14 +16,15 @@ html, body, #root {
   box-sizing: border-box;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f5f5f5; /* Light background for chat app */
-  overflow: hidden; /* Prevent scroll on full-page layout */
+  overflow: hidden; /* Prevent document scroll on full-page layout */
 }
 
-/* Centered root content for small devices */
+/* Centered root content for small devices and Flex layout */
 #root {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  /* Ensure it takes the full available height of the body */
+  min-height: 100%; 
   width: 100%;
   max-width: 100%;
 }
@@ -76,10 +68,12 @@ html, body, #root {
   font-size: 0.9rem;
 }
 
-/* Responsive full-page layout */
+/* Responsive full-page layout adjustments 
+*/
 @media (max-width: 768px) {
+  /* Removed padding on the root element for mobile to allow chatbox to take full screen space */
   #root {
-    padding: 1rem;
+    padding: 0; 
   }
   .logo {
     height: 4em;
@@ -91,10 +85,6 @@ html, body, #root {
 }
 
 @media (max-width: 480px) {
-  #root {
-    flex-direction: column;
-    padding: 0.5rem;
-  }
   .logo {
     height: 3em;
     padding: 0.5em;
@@ -104,18 +94,17 @@ html, body, #root {
   }
 }
 
-/* ✅ Fix for mobile viewport height issues */
+/* ✅ Fix for mobile viewport height issues (using JS variable --vh) 
+*/
 .full-height {
   height: calc(var(--vh, 1vh) * 100);
 }
 
-/* .full-height {
-  height: calc(var(--vh, 1vh) * 100);
-} */
-
+/* Consolidated and Cleaned Scrollbar Styles 
+*/
 .chat-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #555 #222;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #555 #222; /* Firefox: thumb track */
 }
 
 .chat-scrollbar::-webkit-scrollbar {
@@ -128,5 +117,5 @@ html, body, #root {
 }
 
 .chat-scrollbar::-webkit-scrollbar-track {
-  background-color: #222;
+  background-color: transparent; /* Cleaned track to transparent */
 }

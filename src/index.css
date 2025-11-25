@@ -2,28 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Optional: Custom scrollbar for chat box */
+/* * Custom Scrollbar for Chat Box (Tailored for Dark Theme)
+ */
 .chat-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
 .chat-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #d1d5db; /* gray-300 */
+  /* Use a darker color thumb for the dark chat background */
+  background-color: #4b5563; /* gray-600 */
   border-radius: 3px;
 }
 .chat-scrollbar {
     scrollbar-width: thin; /* Firefox */
-    scrollbar-color: #d1d5db transparent;
+    scrollbar-color: #4b5563 transparent;
 }
+ 
+/* * Responsive Viewport Fixes 
+ */
 
 /* Added: real-viewport var + helper to fill mobile viewport */
 :root {
+  /* This variable is typically updated via a small JS snippet in the root component 
+     to accurately capture the viewport height excluding browser UI (dvh behavior). */
   --vh: 1vh;
 }
 
 .full-height {
-  /* Uses the --vh value set in JS to account for mobile browser UI */
+  /* Uses the --vh value set in JS to account for mobile browser UI, ensuring true 100% height */
   height: calc(var(--vh, 1vh) * 100);
-  min-height: 100%;
+  /* Fallback for environments where JS/CSS vars fail */
+  min-height: 100dvh; 
   box-sizing: border-box;
 }
 
@@ -32,7 +40,8 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #f9fafb; /* optional: match your app background */
+  /* Switched to a dark background for consistency with the app's style */
+  background-color: #111827; /* Dark Gray / Slate */
 }
 
 .main-content {
@@ -41,4 +50,3 @@ body {
   min-height: 100vh;
   box-sizing: border-box;
 }
-

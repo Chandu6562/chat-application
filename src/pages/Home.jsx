@@ -18,7 +18,7 @@ const Home = () => {
   // Go back to sidebar in mobile
   const handleCloseChat = () => setMobileView('sidebar');
 
-  // ✅ Fix viewport height for real mobile devices
+  // ✅ Fix viewport height for real mobile devices (Landed here correctly)
   useEffect(() => {
     const setViewportHeight = () => {
       const vh = window.innerHeight * 0.01;
@@ -30,46 +30,56 @@ const Home = () => {
   }, []);
 
   const showSidebarMobile = mobileView === 'sidebar';
-  const showChatBoxMobile = mobileView === 'chatbox';
+  // Use data.chatId as the definitive check for showing the chat on mobile, 
+  // as the `mobileView` state only controls the *visibility*
+  const showChatBoxMobile = mobileView === 'chatbox'; 
 
   return (
-    <div className="flex w-screen overflow-hidden bg-white full-height">
-      <div className="flex w-full h-full overflow-hidden bg-white">
-        
-        {/* SIDEBAR */}
-        <div
-          className={`
-            flex flex-col overflow-y-auto border-r bg-gray-50
-            transition-all duration-300 ease-in-out
-            md:w-1/3 md:flex
-            ${showSidebarMobile ? 'w-full flex' : 'hidden'}
-          `}
-        >
-          <Sidebar onUserSelect={handleOpenChat} />
-        </div>
+    // Outer container: Must use 'full-height' to fix mobile viewport issues
+    <div className="flex overflow-hidden bg-white full-height"> 
+      
+      {/* SIDEBAR */}
+      <div
+        className={`
+          flex flex-col border-r bg-gray-50 full-height
+          transition-all duration-300 ease-in-out
+          
+          /* Desktop: Show sidebar, set its width */
+          md:flex md:w-[300px] md:max-w-[30%]
+          
+          /* Mobile: Conditional display */
+          ${showSidebarMobile ? 'w-full flex' : 'hidden'}
+        `}
+      >
+        {/* Overflow-y-auto is best applied to the content inside the sidebar, not the container itself */}
+        <Sidebar onUserSelect={handleOpenChat} />
+      </div>
 
-        {/* CHATBOX */}
-        <div
-          className={`
-            flex flex-col h-full
-            transition-all duration-300 ease-in-out
-            md:flex md:flex-1
-            ${showChatBoxMobile ? 'w-full flex' : 'hidden'}
-          `}
-        >
-          {isChatSelected ? (
-            <ChatBox
-              onBackToUsers={handleCloseChat}
-              isMobileView={showChatBoxMobile}
-            />
-          ) : (
-            <div className="flex items-center justify-center flex-1 w-full full-height bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-              <p className="px-4 text-xl font-medium text-center text-gray-400">
-                Select a user to start chatting
-              </p>
-            </div>
-          )}
-        </div>
+      {/* CHATBOX */}
+      <div
+        className={`
+          flex flex-col full-height
+          transition-all duration-300 ease-in-out
+          
+          /* Desktop: Always show, take up remaining space */
+          md:flex md:flex-1 
+          
+          /* Mobile: Conditional display */
+          ${showChatBoxMobile ? 'w-full flex' : 'hidden'}
+        `}
+      >
+        {isChatSelected ? (
+          <ChatBox
+            onBackToUsers={handleCloseChat}
+            isMobileView={showChatBoxMobile}
+          />
+        ) : (
+          <div className="flex items-center justify-center flex-1 w-full full-height bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+            <p className="px-4 text-xl font-medium text-center text-gray-400">
+              Select a user to start chatting
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
