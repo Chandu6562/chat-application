@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import Message from './Message';
 import { toast } from 'react-toastify';
 import { Send, Smile, X, ArrowLeft } from 'lucide-react';
-import EmojiPicker from 'emoji-picker-react'; 
+import EmojiPicker from 'emoji-picker-react';  
 
 const ChatBox = ({ onBackToUsers, isMobileView }) => {
 const { data } = useChat();
