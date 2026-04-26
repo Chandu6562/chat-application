@@ -82,7 +82,11 @@ const Home = () => {
     // the dynamic viewport height (preventing header from being pushed off-screen).
     <div 
       className="flex overflow-hidden bg-white" 
-      style={{ height: 'calc(var(--vh, 1vh) * 100)' }} 
+      style={{ 
+        height: '100vh',
+        height: '100dvh', /* Dynamic viewport height for mobile browsers with keyboard */
+        '--vh': `${window.innerHeight * 0.01}px`
+      }} 
     > 
       
       {/* SIDEBAR */}
@@ -98,7 +102,10 @@ const Home = () => {
           ${showSidebarMobile ? 'w-full flex h-full' : 'hidden'}
         `}
         // Apply height to sidebar too for consistency
-        style={{ height: 'calc(var(--vh, 1vh) * 100)' }} 
+        style={{ 
+          height: '100vh',
+          height: '100dvh'
+        }} 
       >
         <Sidebar onUserSelect={handleOpenChat} />
       </div>
@@ -116,7 +123,10 @@ const Home = () => {
           ${showChatBoxMobile ? 'w-full flex h-full' : 'hidden'}
         `}
         // Apply height to chatbox container too for consistency
-        style={{ height: 'calc(var(--vh, 1vh) * 100)' }} 
+        style={{ 
+          height: '100vh',
+          height: '100dvh'
+        }} 
       >
         {isChatSelected ? (
           <ChatBox

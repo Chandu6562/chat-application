@@ -238,21 +238,21 @@ return (
 
 return (
  // Main Chatbox Container: Use h-full to respect the dynamic height set by --vh in Home.jsx
- <div className="relative flex flex-col flex-1 w-full h-full bg-gradient-to-br from-[#0f0f0f] via-[#121212] to-[#1a1a1a] text-gray-200 overflow-hidden rounded-1xl border border-gray-800/50" style={{ WebkitOverflowScrolling: 'touch', overflowY: 'hidden' }}>
+ <div className="chat-container relative flex flex-col flex-1 w-full h-full bg-gradient-to-br from-[#0f0f0f] via-[#121212] to-[#1a1a1a] text-gray-200 overflow-hidden rounded-1xl border border-gray-800/50" style={{ WebkitOverflowScrolling: 'touch', overflowY: 'hidden' }}>
  
  {/* Header: Explicitly flex-shrink-0 to prevent it from being pushed off-screen */}
- <div className="z-20 flex items-center flex-shrink-0 p-4 border-b border-gray-700 bg-black/20 backdrop-blur-xl chat-header">
+ <div className="z-20 flex items-center flex-shrink-0 p-4 border-b border-gray-700 md:p-4 bg-black/20 backdrop-blur-xl chat-header">
  {isMobileView && (
-  <button onClick={onBackToUsers} className="p-1 mr-2 text-gray-300 transition rounded-full md:hidden hover:bg-white/10">
-  <ArrowLeft size={24} />
+  <button onClick={onBackToUsers} className="flex-shrink-0 p-1 mr-2 text-gray-300 transition rounded-full md:hidden hover:bg-white/10">
+  <ArrowLeft size={20} />
   </button>
  )}
- <img src={data.user.photoURL || 'https://placehold.co/40x40/B3E5FC/039BE5?text=AV'} alt="Avatar" className="object-cover w-12 h-12 mr-4 border-2 border-blue-400 rounded-full" />
- <h3 className="text-xl font-semibold text-white">{data.user.displayName}</h3>
+ <img src={data.user.photoURL || 'https://placehold.co/40x40/B3E5FC/039BE5?text=AV'} alt="Avatar" className={`object-cover ${isMobileView ? 'w-10 h-10' : 'w-12 h-12'} mr-3 md:mr-4 border-2 border-blue-400 rounded-full flex-shrink-0`} />
+ <h3 className={`font-semibold text-white truncate ${isMobileView ? 'text-base' : 'text-xl'}`}>{data.user.displayName}</h3>
  </div>
 
  {/* Messages: flex-1 ensures it takes all remaining vertical space after header/input */}
- <div ref={messagesContainerRef} className="flex-1 w-full p-4 overflow-y-auto chat-scrollbar bg-white/5 backdrop-blur-lg messages-container">
+ <div ref={messagesContainerRef} className={`flex-1 w-full overflow-y-auto chat-scrollbar bg-white/5 backdrop-blur-lg messages-container ${isMobileView ? 'p-2' : 'p-4'}`}>
  {messages.map((m) => (
   <Message key={m.id} message={m} onEdit={handleEditMessage} onReply={handleReplyMessage} onDelete={handleDeleteMessage} onReact={handleReactMessage} currentUserId={currentUser.uid} />
  ))}
@@ -262,16 +262,16 @@ return (
  {/* Emoji Picker: Position adjusted to sit right above the input form */}
  {/* bottom-[70px] is relative to the *ChatBox* container's bottom, which is dynamic */}
  {showPicker && (
-  <div className="absolute z-20 overflow-hidden bottom-[70px] right-4 md:right-8 rounded-xl bg-[#1e1e1e]/70 backdrop-blur-2xl shadow-2xl border border-gray-700">
-   <EmojiPicker onEmojiClick={onEmojiClick} height={350} />
+  <div className={`absolute z-20 overflow-hidden ${isMobileView ? 'bottom-[60px] right-2' : 'bottom-[70px] right-4 md:right-8'} rounded-xl bg-[#1e1e1e]/70 backdrop-blur-2xl shadow-2xl border border-gray-700`}>
+   <EmojiPicker onEmojiClick={onEmojiClick} height={isMobileView ? 250 : 350} />
   </div>
  )}
 
  {/* Input: Explicitly flex-shrink-0 to ensure it keeps its size at the bottom */}
- <form onSubmit={handleSend} className="flex flex-col flex-shrink-0 p-4 border-t border-gray-700 bg-black/20 backdrop-blur-xl chat-input-form">
+ <form onSubmit={handleSend} className="flex flex-col flex-shrink-0 p-4 border-t border-gray-700 md:p-4 bg-black/20 backdrop-blur-xl chat-input-form">
  {(editMessageId || replyMessage) && (
-  <div className="mb-2 transition-all duration-300 ease-in-out">
-  <div className="flex items-center justify-between p-3 text-sm border-l-4 border-blue-500 rounded-lg shadow-md bg-blue-500/10 backdrop-blur-md">
+  <div className={`mb-2 transition-all duration-300 ease-in-out ${isMobileView ? 'mb-1' : 'mb-2'}`}>
+  <div className={`flex items-center justify-between ${isMobileView ? 'p-2 text-xs' : 'p-3 text-sm'} border-l-4 border-blue-500 rounded-lg shadow-md bg-blue-500/10 backdrop-blur-md`}>
    {replyMessage ? (
    <div className="truncate">
     <p className="font-semibold text-blue-400">Replying to {replyMessage.senderId === currentUser.uid ? 'You' : data.user.displayName}</p>
@@ -281,27 +281,26 @@ return (
    <p className="font-semibold text-blue-400">📝 Editing Message...</p>
    )}
    <button type="button" className="p-1 ml-3 text-blue-300 transition rounded-full hover:bg-blue-500/20" onClick={replyMessage ? handleCancelReply : handleCancelEdit} title={replyMessage ? 'Cancel Reply' : 'Cancel Edit'}>
-   <X size={18} />
+   <X size={16} />
    </button>
   </div>
   </div>
  )}
 
- <div className="flex items-center space-x-3">
+ <div className={`flex items-center ${isMobileView ? 'gap-2' : 'space-x-3'}`}>
   {!(editMessageId || replyMessage) && (
-  <Smile size={26} className="text-gray-400 transition transform cursor-pointer hover:text-yellow-400 hover:scale-110" onClick={() => setShowPicker(!showPicker)} />
+  <Smile size={isMobileView ? 20 : 26} className="flex-shrink-0 text-gray-400 transition transform cursor-pointer hover:text-yellow-400 hover:scale-110" onClick={() => setShowPicker(!showPicker)} />
   )}
   <input
   type="text"
   placeholder={editMessageId ? 'Edit message...' : replyMessage ? 'Reply to message...' : 'Type a message...'}
   value={text}
   onChange={(e) => setText(e.target.value)}
-  // Remove the onFocus scroll handler here; the useEffect observer should handle it
-  className="flex-1 px-5 py-3 text-gray-100 placeholder-gray-400 border border-gray-700 rounded-full bg-black/10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+  className={`flex-1 px-4 py-2 md:px-5 md:py-3 text-gray-100 placeholder-gray-400 border border-gray-700 rounded-full bg-black/10 focus:ring-2 focus:ring-blue-500 focus:outline-none ${isMobileView ? 'text-sm' : 'text-base'}`}
   autoFocus={!isMobileView && (editMessageId || replyMessage)}
   />
-  <button type="submit" className="p-3 text-white transition transform bg-blue-600 rounded-full shadow-lg hover:bg-blue-700 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled={!text.trim()}>
-  {editMessageId ? 'Update' : <Send size={22} />}
+  <button type="submit" className={`text-white transition transform bg-blue-600 rounded-full shadow-lg hover:bg-blue-700 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 ${isMobileView ? 'p-2' : 'p-3'}`} disabled={!text.trim()}>
+  {editMessageId ? 'Update' : <Send size={isMobileView ? 18 : 22} />}
   </button>
  </div>
  </form>
