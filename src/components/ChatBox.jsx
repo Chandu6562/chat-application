@@ -17,6 +17,7 @@ const [showPicker, setShowPicker] = useState(false);
 const [editMessageId, setEditMessageId] = useState(null);
 const [replyMessage, setReplyMessage] = useState(null);
 const messagesEndRef = useRef(null);
+const inputRef = useRef(null);
 
 // Added: ref for the scrollable messages container
 const messagesContainerRef = useRef(null);
@@ -216,6 +217,11 @@ try {
  await setDoc(doc(db, 'chats', data.chatId), { messages: arrayUnion(messageData) }, { merge: true });
  setText(''); setReplyMessage(null); setShowPicker(false);
  toast.success('Message sent!', { autoClose: 1000 });
+ 
+ // Focus input immediately after sending on mobile to bring up keyboard
+ if (isMobileView && inputRef.current) {
+  setTimeout(() => inputRef.current?.focus(), 100);
+ }
 } catch (err) {
  console.error(err);
  toast.error('Failed to send message.');
@@ -238,7 +244,7 @@ return (
 
 return (
  // Main Chatbox Container: Use h-full to respect the dynamic height set by --vh in Home.jsx
- <div className="chat-container relative flex flex-col flex-1 w-full h-full bg-gradient-to-br from-[#0f0f0f] via-[#121212] to-[#1a1a1a] text-gray-200 overflow-hidden rounded-1xl border border-gray-800/50" style={{ WebkitOverflowScrolling: 'touch', overflowY: 'hidden' }}>
+ <div className="chat-container relative flex flex-col flex-1 w-full h-full bg-gradient-to-br from-[#0f0f0f] via-[#121212] to-[#1a1a1a] text-gray-200 overflow-visible rounded-1xl border border-gray-800/50">
  
  {/* Header: Explicitly flex-shrink-0 to prevent it from being pushed off-screen */}
  <div className="z-20 flex items-center flex-shrink-0 p-4 border-b border-gray-700 md:p-4 bg-black/20 backdrop-blur-xl chat-header">
@@ -292,6 +298,7 @@ return (
   <Smile size={isMobileView ? 20 : 26} className="flex-shrink-0 text-gray-400 transition transform cursor-pointer hover:text-yellow-400 hover:scale-110" onClick={() => setShowPicker(!showPicker)} />
   )}
   <input
+  ref={inputRef}
   type="text"
   placeholder={editMessageId ? 'Edit message...' : replyMessage ? 'Reply to message...' : 'Type a message...'}
   value={text}
