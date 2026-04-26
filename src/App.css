@@ -68,6 +68,42 @@ html, body, #root {
   font-size: 0.9rem;
 }
 
+/* Mobile viewport fix for keyboard handling */
+@media (max-width: 767px) {
+  html, body {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    height: 100svh; /* Use small viewport height to account for mobile browser UI */
+  }
+  
+  #root {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    height: 100svh;
+  }
+  
+  /* Keep header fixed at top on mobile */
+  .chat-header {
+    flex-shrink: 0;
+    z-index: 50;
+  }
+  
+  /* Allow messages to scroll properly */
+  .messages-container {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Keep input fixed at bottom on mobile */
+  .chat-input-form {
+    flex-shrink: 0;
+    z-index: 40;
+  }
+}
+
 /* Responsive full-page layout adjustments 
 */
 @media (max-width: 768px) {

@@ -74,6 +74,12 @@ useEffect(() => {
 const container = messagesContainerRef.current;
 if (!container) return;
 
+// On mobile, disable aggressive scrolling on viewport changes
+// This prevents header/input from disappearing when keyboard opens
+if (isMobileView) {
+ return;
+}
+
 const doScroll = () => {
  // use smooth if possible; small delay for viewport/keyboard animation
  setTimeout(() => scrollToBottom('smooth'), 120);
@@ -112,7 +118,7 @@ return () => {
  window.removeEventListener('resize', onViewportChange);
  }
 };
-}, []);
+}, [isMobileView]);
 
 const onEmojiClick = (emojiData) => {
 const emoji = emojiData?.emoji || emojiData?.native;
@@ -235,7 +241,7 @@ return (
  <div className="relative flex flex-col flex-1 w-full h-full bg-gradient-to-br from-[#0f0f0f] via-[#121212] to-[#1a1a1a] text-gray-200 overflow-hidden rounded-1xl border border-gray-800/50" style={{ WebkitOverflowScrolling: 'touch', overflowY: 'hidden' }}>
  
  {/* Header: Explicitly flex-shrink-0 to prevent it from being pushed off-screen */}
- <div className="z-20 flex items-center flex-shrink-0 p-4 border-b border-gray-700 bg-black/20 backdrop-blur-xl">
+ <div className="z-20 flex items-center flex-shrink-0 p-4 border-b border-gray-700 bg-black/20 backdrop-blur-xl chat-header">
  {isMobileView && (
   <button onClick={onBackToUsers} className="p-1 mr-2 text-gray-300 transition rounded-full md:hidden hover:bg-white/10">
   <ArrowLeft size={24} />
@@ -246,7 +252,7 @@ return (
  </div>
 
  {/* Messages: flex-1 ensures it takes all remaining vertical space after header/input */}
- <div ref={messagesContainerRef} className="flex-1 w-full p-4 overflow-y-auto chat-scrollbar bg-white/5 backdrop-blur-lg">
+ <div ref={messagesContainerRef} className="flex-1 w-full p-4 overflow-y-auto chat-scrollbar bg-white/5 backdrop-blur-lg messages-container">
  {messages.map((m) => (
   <Message key={m.id} message={m} onEdit={handleEditMessage} onReply={handleReplyMessage} onDelete={handleDeleteMessage} onReact={handleReactMessage} currentUserId={currentUser.uid} />
  ))}
@@ -262,7 +268,7 @@ return (
  )}
 
  {/* Input: Explicitly flex-shrink-0 to ensure it keeps its size at the bottom */}
- <form onSubmit={handleSend} className="flex flex-col flex-shrink-0 p-4 border-t border-gray-700 bg-black/20 backdrop-blur-xl">
+ <form onSubmit={handleSend} className="flex flex-col flex-shrink-0 p-4 border-t border-gray-700 bg-black/20 backdrop-blur-xl chat-input-form">
  {(editMessageId || replyMessage) && (
   <div className="mb-2 transition-all duration-300 ease-in-out">
   <div className="flex items-center justify-between p-3 text-sm border-l-4 border-blue-500 rounded-lg shadow-md bg-blue-500/10 backdrop-blur-md">
