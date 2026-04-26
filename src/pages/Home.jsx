@@ -92,7 +92,7 @@ const Home = () => {
           transition-all duration-300 ease-in-out
           
           /* Desktop: Show sidebar, set its width */
-          md:flex md:w-[300px] md:max-w-[30%]
+          md:flex md:w-[400px] md:max-w-[30%]
           
           /* Mobile: Conditional display */
           ${showSidebarMobile ? 'w-full flex h-full' : 'hidden'}

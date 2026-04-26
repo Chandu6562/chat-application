@@ -13,6 +13,7 @@ const Sidebar = ({ onUserSelect }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (!currentUser) return;
@@ -63,6 +64,14 @@ const Sidebar = ({ onUserSelect }) => {
     if (onUserSelect) onUserSelect();
   };
 
+  // Filter users based on search term
+  const filteredUsers = users.filter((user) => {
+    const searchLower = searchTerm.toLowerCase();
+    const displayName = (user.displayName || '').toLowerCase();
+    const email = (user.email || '').toLowerCase();
+    return displayName.includes(searchLower) || email.includes(searchLower);
+  });
+
   return (
     
     <div className="flex flex-col w-full h-full border-r bg-gray-50">
@@ -73,10 +82,12 @@ const Sidebar = ({ onUserSelect }) => {
       </div>
 
       {/* ✅ Search input area: Use flex-shrink-0 to keep it stable */}
-      <div className="z-10 flex-shrink-0 p-4 bg-white border-b">
+      <div className="z-10 flex-shrink-0 p-4 bg-gray-200 border-b">
         <input
           type="text"
           placeholder="Search users..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full p-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
@@ -88,7 +99,7 @@ const Sidebar = ({ onUserSelect }) => {
         )}
         {error && <p className="p-4 text-center text-red-500">{error}</p>}
 
-        {users.map((user) => (
+        {filteredUsers.map((user) => (
           <UserListItem
             key={user.uid}
             user={user}
@@ -96,6 +107,10 @@ const Sidebar = ({ onUserSelect }) => {
             isSelected={data.user?.uid === user.uid}
           />
         ))}
+
+        {filteredUsers.length === 0 && !loading && users.length > 0 && (
+          <p className="p-4 text-center text-gray-500">No users match your search.</p>
+        )}
 
         {users.length === 0 && !loading && (
           <p className="p-4 text-center text-gray-500">No other users found.</p>
