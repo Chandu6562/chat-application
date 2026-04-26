@@ -20,6 +20,7 @@ const messagesEndRef = useRef(null);
 
 // Added: ref for the scrollable messages container
 const messagesContainerRef = useRef(null);
+const isInitialLoadRef = useRef(true);
 
 const scrollToBottom = (behavior = 'smooth') => messagesEndRef.current?.scrollIntoView({ behavior });
 
@@ -58,10 +59,15 @@ return () => unSub();
 
 // Keep simple scroll on messages change (fast path)
 useEffect(() => {
+// On mobile first load, skip scrolling to prevent header from moving up
+if (isMobileView && isInitialLoadRef.current) {
+ isInitialLoadRef.current = false;
+ return;
+}
 // slight delay helps when mobile keyboard is animating viewport
 const t = setTimeout(() => scrollToBottom('auto'), 100);
 return () => clearTimeout(t);
-}, [messages]);
+}, [messages, isMobileView]);
 
 // Robust observer + visualViewport + input-focus handling for mobile keyboards
 useEffect(() => {
@@ -226,7 +232,7 @@ return (
 
 return (
  // Main Chatbox Container: Use h-full to respect the dynamic height set by --vh in Home.jsx
- <div className="relative flex flex-col flex-1 w-full h-full bg-gradient-to-br from-[#0f0f0f] via-[#121212] to-[#1a1a1a] text-gray-200 overflow-hidden rounded-1xl border border-gray-800/50">
+ <div className="relative flex flex-col flex-1 w-full h-full bg-gradient-to-br from-[#0f0f0f] via-[#121212] to-[#1a1a1a] text-gray-200 overflow-hidden rounded-1xl border border-gray-800/50" style={{ WebkitOverflowScrolling: 'touch', overflowY: 'hidden' }}>
  
  {/* Header: Explicitly flex-shrink-0 to prevent it from being pushed off-screen */}
  <div className="z-20 flex items-center flex-shrink-0 p-4 border-b border-gray-700 bg-black/20 backdrop-blur-xl">
@@ -286,7 +292,7 @@ return (
   onChange={(e) => setText(e.target.value)}
   // Remove the onFocus scroll handler here; the useEffect observer should handle it
   className="flex-1 px-5 py-3 text-gray-100 placeholder-gray-400 border border-gray-700 rounded-full bg-black/10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-  autoFocus={editMessageId || replyMessage}
+  autoFocus={!isMobileView && (editMessageId || replyMessage)}
   />
   <button type="submit" className="p-3 text-white transition transform bg-blue-600 rounded-full shadow-lg hover:bg-blue-700 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled={!text.trim()}>
   {editMessageId ? 'Update' : <Send size={22} />}
